@@ -1,13 +1,38 @@
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { useEffect, useRef, useState } from "react";
 import * as pdfjs from "pdfjs-dist";
-import { Canvas, StaticCanvas, FabricImage, IText, FabricObject, Rect, Circle, Line, util } from "fabric";
+import {
+  Canvas,
+  StaticCanvas,
+  FabricImage,
+  IText,
+  FabricObject,
+  Rect,
+  Circle,
+  Line,
+  util,
+} from "fabric";
 // @ts-expect-error - Vite specific import
 import pdfWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
 import {
-  Upload, Type, FileText, Download, Trash2, ArrowLeft, ArrowRight,
-  MousePointer2, Square, Circle as CircleIcon, MoveRight, Bold,
-  Palette, CaseSensitive, Layers, Eraser, Search, Sparkles
+  Upload,
+  Type,
+  FileText,
+  Download,
+  Trash2,
+  ArrowLeft,
+  ArrowRight,
+  MousePointer2,
+  Square,
+  Circle as CircleIcon,
+  MoveRight,
+  Bold,
+  Palette,
+  CaseSensitive,
+  Layers,
+  Eraser,
+  Search,
+  Sparkles,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { cn } from "@/src/lib/utils";
@@ -35,7 +60,9 @@ export default function PdfEditor() {
   const [currentPage, setCurrentPage] = useState(1);
   const [numPages, setNumPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedObject, setSelectedObject] = useState<FabricObject | null>(null);
+  const [selectedObject, setSelectedObject] = useState<FabricObject | null>(
+    null,
+  );
   const [textItems, setTextItems] = useState<PdfTextItem[]>([]);
   const [isTextSelectMode, setIsTextSelectMode] = useState(false);
   const [viewportScale, setViewportScale] = useState(1);
@@ -54,8 +81,12 @@ export default function PdfEditor() {
   const currentPageRef = useRef<number>(1);
 
   // ✅ Keep refs in sync
-  useEffect(() => { pageObjectsRef.current = pageObjects; }, [pageObjects]);
-  useEffect(() => { currentPageRef.current = currentPage; }, [currentPage]);
+  useEffect(() => {
+    pageObjectsRef.current = pageObjects;
+  }, [pageObjects]);
+  useEffect(() => {
+    currentPageRef.current = currentPage;
+  }, [currentPage]);
 
   // Resize handling
   useEffect(() => {
@@ -69,7 +100,10 @@ export default function PdfEditor() {
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        const newWidth = Math.max(300, Math.floor(entry.contentRect.width - 48));
+        const newWidth = Math.max(
+          300,
+          Math.floor(entry.contentRect.width - 48),
+        );
         setContainerWidth(newWidth);
       }
     });
@@ -99,9 +133,15 @@ export default function PdfEditor() {
         backgroundColor: "#ffffff",
       });
 
-      fabricCanvas.current.on("selection:created", (e) => handleSelection(e.selected?.[0] || null));
-      fabricCanvas.current.on("selection:updated", (e) => handleSelection(e.selected?.[0] || null));
-      fabricCanvas.current.on("selection:cleared", () => setSelectedObject(null));
+      fabricCanvas.current.on("selection:created", (e) =>
+        handleSelection(e.selected?.[0] || null),
+      );
+      fabricCanvas.current.on("selection:updated", (e) =>
+        handleSelection(e.selected?.[0] || null),
+      );
+      fabricCanvas.current.on("selection:cleared", () =>
+        setSelectedObject(null),
+      );
 
       return () => {
         fabricCanvas.current?.dispose();
@@ -184,7 +224,7 @@ export default function PdfEditor() {
     // viewport.transform is [scale, 0, 0, -scale, 0, height] usually
 
     // Simplistic hit test
-    const found = textItems.find(item => {
+    const found = textItems.find((item) => {
       // item.transform is [a, b, c, d, e, f]
       // [scale, 0, 0, scale, left, top] is the usual transform for text
       // But pdfjs-dist transform is different.
@@ -198,9 +238,6 @@ export default function PdfEditor() {
       // For now, I'll provide a high-precision "Erase and Replace" tool.
     }
   };
-
-
-
 
   const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -233,14 +270,14 @@ export default function PdfEditor() {
 
     const objects = fabricCanvas.current
       .getObjects()
-      .filter(obj => !(obj as any).data?.isBackground);
+      .filter((obj) => !(obj as any).data?.isBackground);
 
-    const serialized = objects.map(obj => obj.toObject(['data']));
+    const serialized = objects.map((obj) => obj.toObject(["data"]));
 
     // ✅ Use passed pageNum OR fall back to currentPage
     const targetPage = pageNum ?? currentPage;
 
-    setPageObjects(prev => ({
+    setPageObjects((prev) => ({
       ...prev,
       [targetPage]: {
         objects: serialized,
@@ -257,8 +294,10 @@ export default function PdfEditor() {
     const data = pageObjects[pageNum];
     if (!data) return;
 
-    const objectsData = Array.isArray(data) ? data : (data?.objects || []);
-    const savedUiWidth = Array.isArray(data) ? (fabricCanvas.current.width || 800) : (data?.uiWidth || 800);
+    const objectsData = Array.isArray(data) ? data : data?.objects || [];
+    const savedUiWidth = Array.isArray(data)
+      ? fabricCanvas.current.width || 800
+      : data?.uiWidth || 800;
 
     const resizeModifier = currentUiWidth / savedUiWidth;
 
@@ -271,30 +310,30 @@ export default function PdfEditor() {
         top: (data.top || 0) * resizeModifier,
       };
 
-      if (data.type === 'i-text' || data.type === 'text') {
+      if (data.type === "i-text" || data.type === "text") {
         obj = new IText(data.text || "", {
           ...baseOptions,
           scaleX: (data.scaleX || 1) * resizeModifier,
           scaleY: (data.scaleY || 1) * resizeModifier,
         });
-      } else if (data.type === 'rect') {
+      } else if (data.type === "rect") {
         obj = new Rect({
           ...baseOptions,
           scaleX: (data.scaleX || 1) * resizeModifier,
           scaleY: (data.scaleY || 1) * resizeModifier,
         });
-      } else if (data.type === 'circle') {
+      } else if (data.type === "circle") {
         obj = new Circle({
           ...baseOptions,
           scaleX: (data.scaleX || 1) * resizeModifier,
           scaleY: (data.scaleY || 1) * resizeModifier,
         });
-      } else if (data.type === 'line') {
+      } else if (data.type === "line") {
         const lineCoords: [number, number, number, number] = [
           (data.x1 || 0) * resizeModifier,
           (data.y1 || 0) * resizeModifier,
           (data.x2 || 0) * resizeModifier,
-          (data.y2 || 0) * resizeModifier
+          (data.y2 || 0) * resizeModifier,
         ];
         // Lines don't use scaleX/Y for their length by default in our app, they use coords
         obj = new Line(lineCoords, { ...baseOptions, scaleX: 1, scaleY: 1 });
@@ -304,7 +343,11 @@ export default function PdfEditor() {
     }
   };
 
-  const renderPage = async (pdf: any, pageNum: number, keepObjects: boolean = false) => {
+  const renderPage = async (
+    pdf: any,
+    pageNum: number,
+    keepObjects: boolean = false,
+  ) => {
     if (!fabricCanvas.current) return;
 
     try {
@@ -337,7 +380,10 @@ export default function PdfEditor() {
       if (!fabricCanvas.current) return;
 
       fCanvas.clear();
-      fCanvas.setDimensions({ width: Math.floor(viewport.width), height: Math.floor(viewport.height) });
+      fCanvas.setDimensions({
+        width: Math.floor(viewport.width),
+        height: Math.floor(viewport.height),
+      });
 
       img.set({
         selectable: false,
@@ -345,8 +391,8 @@ export default function PdfEditor() {
         data: { isBackground: true },
         left: 0,
         top: 0,
-        originX: 'left',
-        originY: 'top'
+        originX: "left",
+        originY: "top",
       });
       fCanvas.add(img);
       fCanvas.sendObjectToBack(img);
@@ -394,8 +440,6 @@ export default function PdfEditor() {
     toast("Position the white-out box over the text you want to hide.");
   };
 
-
-
   const addText = () => {
     if (!fabricCanvas.current) return;
     const text = new IText("Enter New Text", {
@@ -409,10 +453,6 @@ export default function PdfEditor() {
     fabricCanvas.current.add(text);
     fabricCanvas.current.setActiveObject(text);
   };
-
-
-
-
 
   const addReplaceTool = () => {
     if (!fabricCanvas.current) return;
@@ -442,7 +482,9 @@ export default function PdfEditor() {
     fabricCanvas.current.add(text);
     fabricCanvas.current.setActiveObject(text);
 
-    toast.success("Text Patch added. Place the white box over PDF text to 'edit' it.");
+    toast.success(
+      "Text Patch added. Place the white box over PDF text to 'edit' it.",
+    );
   };
 
   const addRect = () => {
@@ -450,7 +492,7 @@ export default function PdfEditor() {
     const rect = new Rect({
       left: 100,
       top: 100,
-      fill: textColor + '44', // 25% opacity
+      fill: textColor + "44", // 25% opacity
       stroke: textColor,
       strokeWidth: 2,
       width: 100,
@@ -465,7 +507,7 @@ export default function PdfEditor() {
     const circle = new Circle({
       left: 100,
       top: 100,
-      fill: textColor + '44',
+      fill: textColor + "44",
       stroke: textColor,
       strokeWidth: 2,
       radius: 50,
@@ -493,8 +535,6 @@ export default function PdfEditor() {
     fabricCanvas.current.renderAll();
   };
 
-
-
   const downloadPdf = async () => {
     if (!pdfDoc || !fabricCanvas.current || !pdfBytes) {
       toast.error("No PDF loaded");
@@ -506,7 +546,7 @@ export default function PdfEditor() {
 
     // ✅ Fix 1: Anchor pehle banao — browser gesture context preserve hoga
     const a = document.createElement("a");
-    a.style.display = 'none';
+    a.style.display = "none";
     document.body.appendChild(a);
 
     try {
@@ -517,8 +557,8 @@ export default function PdfEditor() {
       // ✅ Fix 2: Current page canvas se directly read karo — stale state bypass
       const currentObjects = canvas
         .getObjects()
-        .filter(obj => !(obj as any).data?.isBackground)
-        .map(obj => obj.toObject(["data"]));
+        .filter((obj) => !(obj as any).data?.isBackground)
+        .map((obj) => obj.toObject(["data"]));
 
       // ✅ Fix 3: pageObjectsRef use karo (latest data, no stale closure)
       const updatedPages: Record<number, any> = { ...pageObjectsRef.current };
@@ -530,9 +570,6 @@ export default function PdfEditor() {
       // ✅ Fix 4: modifiedPdfBytesRef se load karo — original nahi
       const bytesToLoad = modifiedPdfBytesRef.current ?? pdfBytes;
       const finalPdf = await PDFDocument.load(bytesToLoad);
-
-
-
 
       for (let i = 1; i <= numPages; i++) {
         const pageData = updatedPages[i];
@@ -560,19 +597,22 @@ export default function PdfEditor() {
           height: renderCanvas.height,
           enableRetinaScaling: false,
           renderOnAddRemove: false,
-          backgroundColor: 'transparent',
+          backgroundColor: "transparent",
         });
 
         // ✅ Fix 7: Background image bina scale ke add karo — same size hai
         const bgImage = await FabricImage.fromURL(
-          renderCanvas.toDataURL("image/png")
+          renderCanvas.toDataURL("image/png"),
         );
         bgImage.set({
-          left: 0, top: 0,
-          selectable: false, evented: false,
-          scaleX: 1, scaleY: 1, // ✅ no scaling needed — same dimensions
-          originX: 'left',
-          originY: 'top',
+          left: 0,
+          top: 0,
+          selectable: false,
+          evented: false,
+          scaleX: 1,
+          scaleY: 1, // ✅ no scaling needed — same dimensions
+          originX: "left",
+          originY: "top",
         });
         tempCanvas.add(bgImage);
 
@@ -591,12 +631,15 @@ export default function PdfEditor() {
 
         tempCanvas.renderAll();
         // Render complete hone ka wait karo
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, 50));
 
         // ✅ Fix 9: Uint8Array banao — embedPng ko string nahi chahiye
-        const mergedDataUrl = tempCanvas.toDataURL({ format: "png", multiplier: 1 });
-        const base64 = mergedDataUrl.replace(/^data:image\/png;base64,/, '');
-        const pngBytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+        const mergedDataUrl = tempCanvas.toDataURL({
+          format: "png",
+          multiplier: 1,
+        });
+        const base64 = mergedDataUrl.replace(/^data:image\/png;base64,/, "");
+        const pngBytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
 
         const embeddedImage = await finalPdf.embedPng(pngBytes); // ✅ Uint8Array
 
@@ -613,7 +656,9 @@ export default function PdfEditor() {
       // ✅ Fix 11: Modified bytes save karo — agla download original nahi lega
       modifiedPdfBytesRef.current = finalBytes;
 
-      const blob = new Blob([finalBytes], { type: "application/pdf" });
+      const blob = new Blob([new Uint8Array(finalBytes)], {
+        type: "application/pdf",
+      });
       const url = URL.createObjectURL(blob);
       const safeName = fileName.replace(/\.[^/.]+$/, "");
 
@@ -627,7 +672,6 @@ export default function PdfEditor() {
       }, 5000);
 
       toast.success("Edited PDF downloaded", { id: toastId });
-
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Export failed", { id: toastId });
@@ -637,221 +681,16 @@ export default function PdfEditor() {
     }
   };
 
-
-  // const downloadPdf = async () => {
-  //   if (!pdfDoc || !fabricCanvas.current || !pdfBytes) {
-  //     toast.error("No document context. Please reload your file.");
-  //     return;
-  //   }
-
-  //   setIsLoading(true);
-  //   const toastId = toast.loading("Synthesizing final document edits...");
-
-  //   try {
-  //     const canvas = fabricCanvas.current;
-  //     canvas.discardActiveObject();
-  //     canvas.renderAll();
-
-  //     // 1. Capture current page state
-  //     const canvasObjects = canvas.getObjects();
-  //     const currentObjects = canvasObjects
-  //       .filter(o => !(o as any).data?.isBackground)
-  //       .map(o => o.toObject(['data']));
-
-  //     const currentUiWidth = canvas.width || 800;
-
-  //     // Merge state
-  //     const allPageObjectsMap: Record<number, any> = { ...pageObjects };
-  //     allPageObjectsMap[currentPage] = {
-  //       objects: currentObjects,
-  //       uiWidth: currentUiWidth,
-  //     };
-
-  //     // 2. Load PDF with pdf-lib
-  //     const pdfDocToEdit = await PDFDocument.load(pdfBytes);
-  //     const pages = pdfDocToEdit.getPages();
-
-  //     // Prepare fonts
-  //     const defaultFont = await pdfDocToEdit.embedFont(StandardFonts.Helvetica);
-  //     const boldFont = await pdfDocToEdit.embedFont(StandardFonts.HelveticaBold);
-
-  //     const parseColor = (colorStr: string) => {
-  //       if (!colorStr) return { r: 0, g: 0, b: 0, a: 1 };
-
-  //       // Handle hex
-  //       if (colorStr.startsWith('#')) {
-  //         const hex = colorStr.replace('#', '');
-  //         if (hex.length === 3) {
-  //           return {
-  //             r: parseInt(hex[0] + hex[0], 16) / 255,
-  //             g: parseInt(hex[1] + hex[1], 16) / 255,
-  //             b: parseInt(hex[2] + hex[2], 16) / 255,
-  //             a: 1
-  //           };
-  //         }
-  //         if (hex.length === 6) {
-  //           return {
-  //             r: parseInt(hex.substring(0, 2), 16) / 255,
-  //             g: parseInt(hex.substring(2, 4), 16) / 255,
-  //             b: parseInt(hex.substring(4, 6), 16) / 255,
-  //             a: 1
-  //           };
-  //         }
-  //         if (hex.length === 8) {
-  //           return {
-  //             r: parseInt(hex.substring(0, 2), 16) / 255,
-  //             g: parseInt(hex.substring(2, 4), 16) / 255,
-  //             b: parseInt(hex.substring(4, 6), 16) / 255,
-  //             a: parseInt(hex.substring(6, 8), 16) / 255
-  //           };
-  //         }
-  //       }
-
-  //       // Handle rgb/rgba
-  //       const match = colorStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
-  //       if (match) {
-  //         return {
-  //           r: parseInt(match[1]) / 255,
-  //           g: parseInt(match[2]) / 255,
-  //           b: parseInt(match[3]) / 255,
-  //           a: match[4] ? parseFloat(match[4]) : 1
-  //         };
-  //       }
-
-  //       return { r: 0, g: 0, b: 0, a: 1 };
-  //     };
-
-  //     for (let i = 1; i <= numPages; i++) {
-  //       const pageData = allPageObjectsMap[i];
-  //       const objectsData = pageData?.objects || [];
-
-  //       if (objectsData.length === 0) continue;
-
-  //       const pdflibPage = pages[i - 1];
-  //       const { width, height } = pdflibPage.getSize();
-
-  //       const savedUiWidth = pageData?.uiWidth || 800;
-  //       const pdfjsPage = await pdfDoc.getPage(i);
-  //       const unscaledViewport = pdfjsPage.getViewport({ scale: 1 });
-
-  //       // Map the coordinates based on the UI width the objects were drawn in 
-  //       // relative to the final PDF point width.
-  //       const pdfToFabricScale = width / savedUiWidth;
-
-  //           for (const objData of objectsData) {
-  //               const scaledLeft = (objData.left || 0) * pdfToFabricScale;
-  //               const scaledTop = (objData.top || 0) * pdfToFabricScale;
-  //               const pdfY = height - scaledTop;
-
-  //               const fill = parseColor(objData.fill || '#000000');
-  //               const stroke = parseColor(objData.stroke || '#000000');
-
-  //               if (objData.type === 'i-text' || objData.type === 'text') {
-  //                   const text = objData.text || '';
-  //                   const isBold = objData.fontWeight === 'bold';
-  //                   const font = isBold ? boldFont : defaultFont;
-
-  //                   const scaledFontSize = (objData.fontSize || 20) * (objData.scaleY || 1) * pdfToFabricScale;
-
-  //                   pdflibPage.drawText(text, {
-  //                       x: scaledLeft,
-  //                       y: pdfY - scaledFontSize + (scaledFontSize * 0.2), // Adjust for baseline
-  //                       size: scaledFontSize,
-  //                       font: font,
-  //                       color: rgb(fill.r, fill.g, fill.b),
-  //                       opacity: fill.a,
-  //                   });
-  //               } else if (objData.type === 'rect') {
-  //                   const rectWidth = (objData.width || 0) * (objData.scaleX || 1) * pdfToFabricScale;
-  //                   const rectHeight = (objData.height || 0) * (objData.scaleY || 1) * pdfToFabricScale;
-  //                   const strokeWidth = (objData.strokeWidth || 0) * pdfToFabricScale;
-
-  //                   const options: any = {
-  //                       x: scaledLeft,
-  //                       y: pdfY - rectHeight,
-  //                       width: rectWidth,
-  //                       height: rectHeight,
-  //                       color: rgb(fill.r, fill.g, fill.b),
-  //                       opacity: fill.a,
-  //                   };
-
-  //                   if (objData.strokeWidth > 0) {
-  //                       options.borderColor = rgb(stroke.r, stroke.g, stroke.b);
-  //                       options.borderWidth = strokeWidth;
-  //                   }
-
-  //                   pdflibPage.drawRectangle(options);
-  //               } else if (objData.type === 'circle') {
-  //                   const radius = (objData.radius || 0) * pdfToFabricScale;
-  //                   const scaleX = objData.scaleX || 1;
-  //                   const scaleY = objData.scaleY || 1;
-  //                   const strokeWidth = (objData.strokeWidth || 0) * pdfToFabricScale;
-
-  //                   const options: any = {
-  //                       x: scaledLeft + (radius * scaleX),
-  //                       y: pdfY - (radius * scaleY),
-  //                       xScale: radius * scaleX,
-  //                       yScale: radius * scaleY,
-  //                       color: rgb(fill.r, fill.g, fill.b),
-  //                       opacity: fill.a,
-  //                   };
-
-  //                   if (objData.strokeWidth > 0) {
-  //                       options.borderColor = rgb(stroke.r, stroke.g, stroke.b);
-  //                       options.borderWidth = strokeWidth;
-  //                   }
-
-  //                   pdflibPage.drawEllipse(options);
-  //               } else if (objData.type === 'line') {
-  //                   const x1 = (objData.x1 || 0) * pdfToFabricScale;
-  //                   const y1 = (objData.y1 || 0) * pdfToFabricScale;
-  //                   const x2 = (objData.x2 || 0) * pdfToFabricScale;
-  //                   const y2 = (objData.y2 || 0) * pdfToFabricScale;
-
-  //                   const thickness = (objData.strokeWidth || 1) * pdfToFabricScale;
-
-  //                   pdflibPage.drawLine({
-  //                       start: { x: scaledLeft + x1, y: pdfY - y1 },
-  //                       end: { x: scaledLeft + x2, y: pdfY - y2 },
-  //                       thickness: thickness,
-  //                       color: rgb(stroke.r, stroke.g, stroke.b),
-  //                       opacity: stroke.a,
-  //                   });
-  //               }
-  //           }
-  //       }
-
-
-
-  //       const pdfOutputBytes = await pdfDocToEdit.save();
-  //       const blob = new Blob([pdfOutputBytes], { type: 'application/pdf' });
-  //       const downloadUrl = URL.createObjectURL(blob);
-
-  //       const link = document.createElement('a');
-  //       link.href = downloadUrl;
-  //       const safeName = fileName ? fileName.replace(/\.[^/.]+$/, '') : 'edited_document';
-  //       link.download = `MODIFIED_${safeName}_${Date.now()}.pdf`;
-  //       document.body.appendChild(link);
-  //       link.click();
-  //       document.body.removeChild(link);
-
-  //       setTimeout(() => URL.revokeObjectURL(downloadUrl), 5000);
-  //       toast.success("Document exported successfully", { id: toastId });
-  //     } catch (error: any) {
-  //       console.error("PDF Export Failure:", error);
-  //       toast.error(`Synthesis failed: ${error?.message || "Unknown error"}`, { id: toastId });
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-
-
   return (
     <div className="max-w-screen-2xl mx-auto space-y-6 md:space-y-8 px-4 md:px-0">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4 md:pb-6">
         <div className="space-y-1">
-          <h1 className="text-xl md:text-3xl font-bold tracking-tight text-slate-900">Advanced PDF Editor</h1>
-          <p className="text-[11px] md:text-sm text-slate-500 font-medium">Text reconstruction and architectural document manipulation.</p>
+          <h1 className="text-xl md:text-3xl font-bold tracking-tight text-slate-900">
+            Advanced PDF Editor
+          </h1>
+          <p className="text-[11px] md:text-sm text-slate-500 font-medium">
+            Text reconstruction and architectural document manipulation.
+          </p>
         </div>
         <div className="flex gap-3">
           <button
@@ -875,7 +714,8 @@ export default function PdfEditor() {
                   className="flex items-center gap-1.5 md:gap-2 rounded-sm px-2 md:px-4 py-2 hover:bg-slate-50 text-slate-700 text-[9px] md:text-[11px] font-bold uppercase tracking-widest disabled:opacity-30 transition-all active:scale-95 whitespace-nowrap"
                   title="Add New Text"
                 >
-                  <Type size={14} className="md:w-4 md:h-4" /> <span className="sm:inline">Add Text</span>
+                  <Type size={14} className="md:w-4 md:h-4" />{" "}
+                  <span className="sm:inline">Add Text</span>
                 </button>
                 <button
                   onClick={addReplaceTool}
@@ -883,7 +723,8 @@ export default function PdfEditor() {
                   className="flex items-center gap-1.5 md:gap-2 rounded-sm px-2 md:px-4 py-2 hover:bg-indigo-50 text-indigo-600 text-[9px] md:text-[11px] font-bold uppercase tracking-widest disabled:opacity-30 transition-all active:scale-95 whitespace-nowrap"
                   title="Mask & Replace Text"
                 >
-                  <Layers size={14} className="md:w-4 md:h-4" /> <span className="sm:inline">Replace Text</span>
+                  <Layers size={14} className="md:w-4 md:h-4" />{" "}
+                  <span className="sm:inline">Replace Text</span>
                 </button>
                 <button
                   onClick={addWhiteOut}
@@ -891,7 +732,8 @@ export default function PdfEditor() {
                   className="flex items-center gap-1.5 md:gap-2 rounded-sm px-2 md:px-4 py-2 hover:bg-slate-50 text-slate-700 text-[9px] md:text-[11px] font-bold uppercase tracking-widest disabled:opacity-30 transition-all active:scale-95 whitespace-nowrap"
                   title="White Out Area"
                 >
-                  <Eraser size={14} className="md:w-4 md:h-4" /> <span className="sm:inline">White-out</span>
+                  <Eraser size={14} className="md:w-4 md:h-4" />{" "}
+                  <span className="sm:inline">White-out</span>
                 </button>
 
                 <div className="h-6 w-px bg-slate-200 mx-1 md:mx-2 shrink-0 hidden md:block" />
@@ -930,10 +772,10 @@ export default function PdfEditor() {
                   disabled={!selectedObject}
                   className="flex items-center gap-1.5 md:gap-2 rounded-sm px-2 md:px-4 py-2 hover:bg-red-50 text-red-500 text-[9px] md:text-[11px] font-bold uppercase tracking-widest disabled:opacity-30 transition-all active:scale-95 whitespace-nowrap"
                 >
-                  <Trash2 size={14} className="md:w-4 md:h-4" /> <span className="sm:inline">Delete</span>
+                  <Trash2 size={14} className="md:w-4 md:h-4" />{" "}
+                  <span className="sm:inline">Delete</span>
                 </button>
               </div>
-
 
               {pdfDoc && (
                 <div className="flex items-center justify-center gap-3 md:gap-6 bg-slate-50 px-3 md:px-4 py-1.5 md:py-2 rounded-full border border-slate-100 mt-2 md:mt-0">
@@ -945,8 +787,16 @@ export default function PdfEditor() {
                     <ArrowLeft size={16} className="text-slate-600" />
                   </button>
                   <div className="flex flex-col items-center min-w-[50px] md:min-w-[60px]">
-                    <span className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.15em] text-slate-400 leading-none mb-0.5">Page</span>
-                    <span className="text-[11px] md:text-[14px] font-bold text-indigo-600 tabular-nums leading-none">{currentPage} <span className="text-slate-300 font-medium whitespace-pre">/</span> {numPages}</span>
+                    <span className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.15em] text-slate-400 leading-none mb-0.5">
+                      Page
+                    </span>
+                    <span className="text-[11px] md:text-[14px] font-bold text-indigo-600 tabular-nums leading-none">
+                      {currentPage}{" "}
+                      <span className="text-slate-300 font-medium whitespace-pre">
+                        /
+                      </span>{" "}
+                      {numPages}
+                    </span>
                   </div>
                   <button
                     onClick={() => changePage(1)}
@@ -960,19 +810,31 @@ export default function PdfEditor() {
             </div>
           </div>
 
-          <div ref={workspaceRef} className="relative overflow-auto rounded-md border border-slate-200 bg-slate-100/50 flex justify-center shadow-inner h-[calc(100vh-320px)] min-h-[500px] md:min-h-[600px] scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
+          <div
+            ref={workspaceRef}
+            className="relative overflow-auto rounded-md border border-slate-200 bg-slate-100/50 flex justify-center shadow-inner h-[calc(100vh-320px)] min-h-[500px] md:min-h-[600px] scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
+          >
             {!pdfDoc && !isLoading && (
-              <div id="pdf-empty-state" className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-6 bg-white">
+              <div
+                id="pdf-empty-state"
+                className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-6 bg-white"
+              >
                 <div className="rounded-sm bg-indigo-50 border border-indigo-100 p-8 text-primary shadow-sm shadow-indigo-50">
                   <FileText size={48} strokeWidth={1.5} />
                 </div>
                 <div className="text-center space-y-1">
-                  <p className="text-lg font-bold text-slate-900 tracking-tight">System Idle: No Document Active</p>
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Import a PDF to initialize the rendering engine</p>
+                  <p className="text-lg font-bold text-slate-900 tracking-tight">
+                    System Idle: No Document Active
+                  </p>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">
+                    Import a PDF to initialize the rendering engine
+                  </p>
                 </div>
                 <button
                   id="pdf-upload-btn"
-                  onClick={() => document.getElementById('pdf-edit-upload')?.click()}
+                  onClick={() =>
+                    document.getElementById("pdf-edit-upload")?.click()
+                  }
                   className="rounded-md bg-primary px-12 py-3 text-[12px] font-bold uppercase tracking-widest text-white transition-all hover:bg-primary-hover shadow-lg hover:shadow-indigo-100"
                 >
                   Import PDF Document
@@ -981,13 +843,21 @@ export default function PdfEditor() {
             )}
 
             {isLoading && (
-              <div id="pdf-loading-state" className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-white/80 backdrop-blur-sm">
+              <div
+                id="pdf-loading-state"
+                className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-white/80 backdrop-blur-sm"
+              >
                 <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
-                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 animate-pulse">Scanning Document Structures...</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 animate-pulse">
+                  Scanning Document Structures...
+                </p>
               </div>
             )}
 
-            <div id="pdf-canvas-container" className="shadow-2xl border border-slate-100 bg-white transition-all my-8">
+            <div
+              id="pdf-canvas-container"
+              className="shadow-2xl border border-slate-100 bg-white transition-all my-8"
+            >
               <canvas ref={canvasRef} />
             </div>
             <input
@@ -1020,15 +890,23 @@ export default function PdfEditor() {
                         onChange={(e) => handleFontFamilyChange(e.target.value)}
                         className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-sm text-slate-700 font-medium focus:outline-none focus:ring-1 focus:ring-primary/30"
                       >
-                        {FONTS.map(f => <option key={f} value={f}>{f}</option>)}
+                        {FONTS.map((f) => (
+                          <option key={f} value={f}>
+                            {f}
+                          </option>
+                        ))}
                       </select>
                     </div>
 
                     {/* Font Size & Weight */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Scale & Weight</label>
-                        <span className="text-xs font-mono text-slate-500">{fontSize}px</span>
+                        <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                          Scale & Weight
+                        </label>
+                        <span className="text-xs font-mono text-slate-500">
+                          {fontSize}px
+                        </span>
                       </div>
                       <div className="flex items-center gap-4">
                         <input
@@ -1036,14 +914,18 @@ export default function PdfEditor() {
                           min="8"
                           max="120"
                           value={fontSize}
-                          onChange={(e) => handleFontSizeChange(parseInt(e.target.value))}
+                          onChange={(e) =>
+                            handleFontSizeChange(parseInt(e.target.value))
+                          }
                           className="flex-1 accent-primary h-1 bg-slate-100 rounded-lg appearance-none cursor-pointer"
                         />
                         <button
                           onClick={toggleBold}
                           className={cn(
                             "p-2 rounded-md border transition-all",
-                            isBold ? "bg-primary text-white border-primary shadow-sm" : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
+                            isBold
+                              ? "bg-primary text-white border-primary shadow-sm"
+                              : "bg-white text-slate-600 border-slate-200 hover:border-slate-300",
                           )}
                         >
                           <Bold size={16} />
@@ -1059,13 +941,23 @@ export default function PdfEditor() {
                     <Palette size={14} /> Color Palette
                   </label>
                   <div className="flex flex-wrap gap-2 p-3 rounded-md bg-slate-50 border border-slate-100">
-                    {["#000000", "#ffffff", "#4338ca", "#ef4444", "#22c55e", "#eab308", "#6366f1", "#ec4899"].map(c => (
+                    {[
+                      "#000000",
+                      "#ffffff",
+                      "#4338ca",
+                      "#ef4444",
+                      "#22c55e",
+                      "#eab308",
+                      "#6366f1",
+                      "#ec4899",
+                    ].map((c) => (
                       <button
                         key={c}
                         onClick={() => handleTextColorChange(c)}
                         className={cn(
                           "w-6 h-6 rounded-full border border-slate-300 shadow-sm transition-transform hover:scale-110",
-                          textColor === c && "ring-2 ring-primary ring-offset-2 scale-110"
+                          textColor === c &&
+                            "ring-2 ring-primary ring-offset-2 scale-110",
                         )}
                         style={{ backgroundColor: c }}
                       />
@@ -1097,7 +989,8 @@ export default function PdfEditor() {
                   <MousePointer2 size={20} className="text-slate-300" />
                 </div>
                 <p className="text-[11px] leading-relaxed text-slate-500 font-medium max-w-[200px] mx-auto">
-                  Select a text or shape layer to modify its global properties and visual descriptors.
+                  Select a text or shape layer to modify its global properties
+                  and visual descriptors.
                 </p>
               </div>
             )}
@@ -1111,16 +1004,24 @@ export default function PdfEditor() {
               <div className="p-4 rounded-md bg-indigo-900 border border-slate-800 space-y-2">
                 <div className="flex items-center gap-2">
                   <Sparkles size={14} className="text-indigo-400" />
-                  <p className="text-[10px] font-bold uppercase text-white tracking-wider">Modification Engine</p>
+                  <p className="text-[10px] font-bold uppercase text-white tracking-wider">
+                    Modification Engine
+                  </p>
                 </div>
                 <p className="text-[11px] leading-relaxed text-slate-300 font-medium font-sans">
-                  Use the <span className="text-white font-bold">Replace Text</span> tool to overlay high-fidelity text masks on existing document segments.
+                  Use the{" "}
+                  <span className="text-white font-bold">Replace Text</span>{" "}
+                  tool to overlay high-fidelity text masks on existing document
+                  segments.
                 </p>
               </div>
               <div className="p-4 rounded-md bg-slate-50 border border-slate-100 space-y-1.5 grayscale opacity-70">
-                <p className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Detected Metadata</p>
+                <p className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                  Detected Metadata
+                </p>
                 <p className="text-[11px] leading-relaxed text-slate-600 font-medium font-sans">
-                  {textItems.length} text fragments identified in current viewport buffer.
+                  {textItems.length} text fragments identified in current
+                  viewport buffer.
                 </p>
               </div>
             </div>
