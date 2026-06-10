@@ -1,0 +1,10 @@
+{
+  "name": "AI Studio",
+  "description": "An advanced web app for converting images to PDF, editing PDFs and images, and AI-powered file analysis.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

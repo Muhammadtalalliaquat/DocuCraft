@@ -1,0 +1,24 @@
+{
+  "entities": {
+    "Review": {
+      "title": "Review",
+      "description": "User feedback and reviews.",
+      "type": "object",
+      "properties": {
+        "userName": { "type": "string", "description": "Name of the reviewer" },
+        "userId": { "type": "string", "description": "UID of the reviewer" },
+        "userPhoto": { "type": "string", "description": "Profile picture URL" },
+        "rating": { "type": "number", "description": "Rating from 1 to 5" },
+        "comment": { "type": "string", "description": "Review text content" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["userName", "userId", "rating", "comment", "createdAt"]
+    }
+  },
+  "firestore": {
+    "reviews": {
+      "schema": "Review",
+      "description": "Collection of user reviews."
+    }
+  }
+}
