@@ -12,7 +12,6 @@ import {
   Line,
   util,
 } from "fabric";
-// @ts-expect-error - Vite specific import
 import pdfWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
 import {
   Upload,
