@@ -7,36 +7,49 @@ import {
   ArrowRight,
   Zap,
   Shield,
-  Clock
+  Clock,
+  HardDrive
 } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "@/src/lib/utils";
 
 const features = [
   {
+    title: "File Vault",
+    description:
+      "Advanced virtual nested directory structure to organize files, apply tags, and edit notes.",
+    icon: HardDrive,
+    href: "/files",
+    color: "bg-indigo-600",
+  },
+  {
     title: "Image to PDF",
-    description: "Convert batches of images into high-quality PDF documents with customizable orientation.",
+    description:
+      "Convert batches of images into high-quality PDF documents with customizable orientation.",
     icon: FileType,
     href: "/convert",
     color: "bg-indigo-500",
   },
   {
     title: "PDF Editor",
-    description: "Full suite of PDF editing tools. Add text, images, and resize elements with ease.",
+    description:
+      "Full suite of PDF editing tools. Add text, images, and resize elements with ease.",
     icon: FileEdit,
     href: "/edit-pdf",
     color: "bg-slate-700",
   },
   {
     title: "Image Editor",
-    description: "Annotate and edit images. Add text overlays and rotate or resize with precision.",
+    description:
+      "Annotate and edit images. Add text overlays and rotate or resize with precision.",
     icon: ImageIcon,
     href: "/edit-image",
     color: "bg-indigo-400",
   },
   {
     title: "AI Assistant",
-    description: "Intelligent analysis for your files. Get improvement suggestions and deep insights.",
+    description:
+      "Intelligent analysis for your files. Get improvement suggestions and deep insights.",
     icon: Sparkles,
     href: "/assistant",
     color: "bg-purple-600",

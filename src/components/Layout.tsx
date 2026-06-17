@@ -1,15 +1,16 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { 
-  LayoutDashboard, 
-  FileType, 
-  FileEdit, 
-  Image as ImageIcon, 
-  Sparkles, 
+import {
+  LayoutDashboard,
+  FileType,
+  FileEdit,
+  Image as ImageIcon,
+  Sparkles,
   MessageSquare,
   Menu,
   X,
   LogOut,
-  LogIn
+  LogIn,
+  HardDrive,
 } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -19,6 +20,7 @@ import Logo from "@/src/components/Logo";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "File Vault", href: "/files", icon: HardDrive },
   { name: "Image to PDF", href: "/convert", icon: FileType },
   { name: "PDF Editor", href: "/edit-pdf", icon: FileEdit },
   { name: "Image Editor", href: "/edit-image", icon: ImageIcon },
@@ -40,9 +42,11 @@ export default function Layout() {
             <Logo size="md" />
           </Link>
         </div>
-        
+
         <nav className="flex-1 px-4 mt-4 space-y-1">
-          <div className="text-[10px] uppercase font-semibold text-slate-400 px-3 py-2 tracking-widest">Main Menu</div>
+          <div className="text-[10px] uppercase font-semibold text-slate-400 px-3 py-2 tracking-widest">
+            Main Menu
+          </div>
           {navigation.map((item) => (
             <Link
               key={item.name}
@@ -51,10 +55,17 @@ export default function Layout() {
                 "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 border border-transparent",
                 location.pathname === item.href
                   ? "bg-indigo-50 text-primary border-indigo-100"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
               )}
             >
-              <item.icon size={18} className={cn(location.pathname === item.href ? "text-primary" : "text-slate-400")} />
+              <item.icon
+                size={18}
+                className={cn(
+                  location.pathname === item.href
+                    ? "text-primary"
+                    : "text-slate-400",
+                )}
+              />
               {item.name}
             </Link>
           ))}
@@ -67,16 +78,26 @@ export default function Layout() {
             <div className="space-y-3">
               <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-lg border border-slate-100">
                 {user.photoURL ? (
-                  <img src={user.photoURL} alt={user.displayName || ""} className="w-10 h-10 rounded-full border-2 border-white shadow-sm" />
+                  <img
+                    src={user.photoURL}
+                    alt={user.displayName || ""}
+                    className="w-10 h-10 rounded-full border-2 border-white shadow-sm"
+                  />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">{user.displayName?.[0] || "U"}</div>
+                  <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+                    {user.displayName?.[0] || "U"}
+                  </div>
                 )}
                 <div className="overflow-hidden">
-                  <p className="text-sm font-semibold truncate text-slate-900">{user.displayName || "User"}</p>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Welcome</p>
+                  <p className="text-sm font-semibold truncate text-slate-900">
+                    {user.displayName || "User"}
+                  </p>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+                    Welcome
+                  </p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={logout}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md text-[10px] font-bold uppercase tracking-[0.2em] text-red-500 hover:bg-red-50 transition-all border border-transparent hover:border-red-100"
               >
@@ -84,7 +105,7 @@ export default function Layout() {
               </button>
             </div>
           ) : (
-            <button 
+            <button
               onClick={login}
               className="w-full flex items-center justify-center gap-2 bg-primary text-white p-3 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] shadow-lg shadow-indigo-100 hover:bg-primary-hover hover:-translate-y-0.5 active:translate-y-0 transition-all"
             >
@@ -145,12 +166,18 @@ export default function Layout() {
               className="fixed inset-y-0 left-0 z-50 w-72 bg-white p-6 shadow-2xl lg:hidden"
             >
               <div className="mb-8">
-                <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="block">
+                <Link
+                  to="/"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block"
+                >
                   <Logo size="md" />
                 </Link>
               </div>
               <nav className="space-y-1">
-                <div className="text-[10px] uppercase font-semibold text-slate-400 px-3 py-2 tracking-widest">Main Menu</div>
+                <div className="text-[10px] uppercase font-semibold text-slate-400 px-3 py-2 tracking-widest">
+                  Main Menu
+                </div>
                 {navigation.map((item) => (
                   <Link
                     key={item.name}
@@ -160,10 +187,17 @@ export default function Layout() {
                       "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 border border-transparent",
                       location.pathname === item.href
                         ? "bg-indigo-50 text-primary border-indigo-100"
-                        : "text-slate-600 hover:bg-slate-50"
+                        : "text-slate-600 hover:bg-slate-50",
                     )}
                   >
-                    <item.icon size={18} className={cn(location.pathname === item.href ? "text-primary" : "text-slate-400")} />
+                    <item.icon
+                      size={18}
+                      className={cn(
+                        location.pathname === item.href
+                          ? "text-primary"
+                          : "text-slate-400",
+                      )}
+                    />
                     {item.name}
                   </Link>
                 ))}

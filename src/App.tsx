@@ -13,6 +13,7 @@ import PdfEditor from "./pages/PdfEditor";
 import ImageEditor from "./pages/ImageEditor";
 import Assistant from "./pages/Assistant";
 import Reviews from "./pages/Reviews";
+import FileManager from "./pages/FileManager";
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
             <Route path="edit-image" element={<ImageEditor />} />
             <Route path="assistant" element={<Assistant />} />
             <Route path="reviews" element={<Reviews />} />
+            <Route path="files" element={<FileManager />} />
           </Route>
         </Routes>
         <Toaster position="bottom-right" />

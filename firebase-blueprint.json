@@ -10,15 +10,108 @@
         "userPhoto": { "type": "string", "description": "Profile picture URL" },
         "rating": { "type": "number", "description": "Rating from 1 to 5" },
         "comment": { "type": "string", "description": "Review text content" },
-        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        }
       },
       "required": ["userName", "userId", "rating", "comment", "createdAt"]
+    },
+    "Folder": {
+      "title": "Folder",
+      "description": "Virtual directory for file storage.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Folder name" },
+        "parentId": {
+          "type": "string",
+          "description": "ID of parent folder if nested"
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Creation timestamp (epoch milliseconds)"
+        },
+        "updatedAt": {
+          "type": "number",
+          "description": "Last updated timestamp (epoch milliseconds)"
+        },
+        "isStarred": {
+          "type": "boolean",
+          "description": "Whether the folder is starred/favorite"
+        },
+        "userId": { "type": "string", "description": "UID of the owner" },
+        "tags": {
+          "type": "array",
+          "description": "Tags associated with folder"
+        }
+      },
+      "required": ["name", "createdAt", "updatedAt", "userId"]
+    },
+    "File": {
+      "title": "File",
+      "description": "Document or uploaded asset in the file manager.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "File name" },
+        "folderId": { "type": "string", "description": "ID of parent folder" },
+        "size": { "type": "number", "description": "File size in bytes" },
+        "type": {
+          "type": "string",
+          "description": "MIME type or file category"
+        },
+        "content": {
+          "type": "string",
+          "description": "Textual content of the file"
+        },
+        "imageBlob": {
+          "type": "string",
+          "description": "Base64 string data or URL for image"
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Creation timestamp (epoch milliseconds)"
+        },
+        "updatedAt": {
+          "type": "number",
+          "description": "Last updated timestamp (epoch milliseconds)"
+        },
+        "isStarred": {
+          "type": "boolean",
+          "description": "Whether the file is starred/favorite"
+        },
+        "isTrash": {
+          "type": "boolean",
+          "description": "Whether the file is in recycle bin"
+        },
+        "trashAt": {
+          "type": "number",
+          "description": "Timestamp when deleted"
+        },
+        "tags": {
+          "type": "array",
+          "description": "Tags associated with file"
+        },
+        "userId": {
+          "type": "string",
+          "description": "UID of the owner"
+        }
+      },
+      "required": ["name", "size", "type", "createdAt", "updatedAt", "userId"]
     }
   },
   "firestore": {
     "reviews": {
       "schema": "Review",
       "description": "Collection of user reviews."
+    },
+    "folders": {
+      "schema": "Folder",
+      "description": "Collection of user folders."
+    },
+    "files": {
+      "schema": "File",
+      "description": "Collection of user files."
     }
   }
 }
